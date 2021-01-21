@@ -235,6 +235,16 @@ docs = dict(
         colref_desc,
         "Values from this column or array_like are used to assign marks to facetted subplots in the horizontal direction.",
     ],
+    facet_row_weights=[
+        "list",
+        "list of weights, one for each row facet, applied to row facets from top to bottom",
+        "The weights are used to determine the relative size of each facet.",
+    ],
+    facet_col_weights=[
+        "list",
+        "list of weights, one for each column facet, ordered from left to right",
+        "The weights are used to determine the relative size of each facet.",
+    ],
     facet_col_wrap=[
         "int",
         "Maximum number of facet columns.",

@@ -2164,6 +2164,32 @@ Use the {facet_arg} argument to adjust this spacing.""".format(
             )
             raise e
 
+    # adjust row sizes if argument was passed
+    rweights = args.get("facet_row_weights",None)
+    if not (rweights is None) and len(row_heights) > 1:
+        rweights = np.array(rweights)
+        rheights = np.array(row_heights)
+        if rweights.shape[0] != rheights.shape[0]:
+            raise ValueError("mismatched facet_row_weights and # of facet rows")
+
+        # normalize weights & reverse, as rows are in reverse order (bottom to top)
+        weights = (rweights / rweights.sum())[::-1]
+        nheights = rheights * weights
+        row_heights = list(nheights)
+
+    # adjust column sizes if argument was passed
+    cweights = args.get("facet_col_weights", None)
+    if not (cweights is None) and len(column_widths) > 1:
+        cweights = np.array(cweights)
+        cwidths = np.array(column_widths)
+        if cweights.shape[0] != cwidths.shape[0]:
+            raise ValueError("mismatched facet_col_weights and # of facet columns")
+
+        # normalize weights
+        weights = (cweights / cweights.sum())
+        nwidths = cwidths * weights
+        column_widths = list(nwidths)
+
     # Create figure with subplots
     try:
         fig = make_subplots(

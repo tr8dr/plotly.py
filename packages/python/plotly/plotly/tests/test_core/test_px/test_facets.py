@@ -1,5 +1,6 @@
 import plotly
 import pandas as pd
+import numpy as np
 import plotly.express as px
 from pytest import approx
 import pytest
@@ -134,3 +135,35 @@ def test_bad_facet_spacing_eror(bad_facet_spacing_df):
     except ValueError:
         # Error shouldn't be raised, so fail if it is
         assert False
+
+
+def test_mismatched_facet_weights():
+    dates = [pd.to_datetime("2010-1-1") + pd.DateOffset(days=i * 10) for i in range(300)]
+    y1 = pd.Series(np.random.normal(0.25, 1.0, 300)).cumsum()
+    y2 = pd.Series(np.random.normal(0.1, 1.0, 300)).cumsum()
+    y3 = pd.Series(np.random.normal(0.1, 1.0, 300)).cumsum()
+
+    df = pd.concat([
+        pd.DataFrame({'date': dates, 'value': y1, 'what': 'v1', 'pane': 'price'}),
+        pd.DataFrame({'date': dates, 'value': y2, 'what': 'v2', 'pane': 'price'}),
+        pd.DataFrame({'date': dates, 'value': y3, 'what': 'v3', 'pane': 'metrics'})
+    ])
+
+    try:
+        fig = px.line(df, x='date', y='value', color='what', facet_row='pane', facet_row_weights=[2, 1])
+    except ValueError:
+        # Error shouldn't be raised, so fail if it is
+        assert False
+
+    try:
+        fig = px.line(df, x='date', y='value', color='what', facet_col='pane', facet_col_weights=[2, 1])
+    except ValueError:
+        # Error shouldn't be raised, so fail if it is
+        assert False
+
+    with pytest.raises(ValueError, match="mismatched facet_row_weights and # of facet rows"):
+        fig = px.line(df, x='date', y='value', color='what', facet_row='pane', facet_row_weights=[2, 1, 1])
+
+    with pytest.raises(ValueError, match="mismatched facet_col_weights and # of facet columns"):
+        fig = px.line(df, x='date', y='value', color='what', facet_col='pane', facet_col_weights=[2, 1, 1])
+
